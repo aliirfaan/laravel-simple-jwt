@@ -1,0 +1,27 @@
+{
+    "name": "aliirfaan/laravel-simple-jwt",
+    "description": "Generate and verify Json Web Token (JWT) in Laravel",
+    "license": "MIT",
+    "keywords": ["Laravel", "JWT"],
+    "authors": [
+        {
+            "name": "aliirfaan",
+            "email": "aliirfaan.freelance@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "aliirfaan\\LaravelSimpleJwt\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "aliirfaan\\LaravelSimpleJwt\\SimpleJwtServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "firebase/php-jwt": "^5.2"
+    }
+}
