@@ -171,7 +171,7 @@ class JwtTestController extends Controller
         $modelId = 253; // your model id
         $refreshToken = '798798-543543-5435432543'; // the refresh token sent by consumer/client, will be null for new logins
 
-        $refreshTokenResult = processRefreshToken($refreshToken, $modelType, $modelId);
+        $refreshTokenResult = processRefreshToken($modelType, $modelId, $refreshToken);
         dd($refreshTokenResult);
     }
 }
