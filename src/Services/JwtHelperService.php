@@ -179,12 +179,13 @@ class JwtHelperService
      * verifyRefreshToken
      *
      * verifies refersh token validity by comparison, expiry date, blacklisted
-     * 
-     * @param  string $token refresh token
+     *
      * @param  ModelRefreshToken $modelObject
+     * @param  string/null $token refresh token. If token is null,we only check if blacklisted and expiry
+     * 
      * @return array
      */
-    public function verifyRefreshToken($token, $modelObject)
+    public function verifyRefreshToken($modelObject, $token = null)
     {
         $data = array(
             'success' => false,
@@ -193,7 +194,7 @@ class JwtHelperService
         );
 
         // check if refresh token matches
-        if (Hash::check($token, $modelObject->refresh_token) == false) {
+        if (!is_null($token) && Hash::check($token, $modelObject->refresh_token) == false) {
             $data['errors'] = true;
             $data['message'] = 'Refresh token does not match';
         }
@@ -228,12 +229,12 @@ class JwtHelperService
      * 
      * Verifies refresh token in the database and updates token if required
      *
-     * @param  string $token refresh token
      * @param  string $modelType model name
      * @param  int $modelId model id in database
+     * @param  string|null $token refresh token
      * @return array
      */
-    public function processRefreshToken($token, $modelType, $modelId)
+    public function processRefreshToken($modelType, $modelId, $token = null)
     {
         $data = array(
             'success' => false,
@@ -249,7 +250,7 @@ class JwtHelperService
 
             if (!is_null($refreshTokenObj)) {
                 // a refresh token exists, check its validity
-                $isValidRefreshToken = $this->verifyRefreshToken($token, $refreshTokenObj);
+                $isValidRefreshToken = $this->verifyRefreshToken($refreshTokenObj, $token);
                 if ($isValidRefreshToken['success'] == true) {
                     if (intval($this->jwtRefreshShouldExtend) == 1) {
                         $refreshTokenData = [
