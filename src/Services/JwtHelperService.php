@@ -277,7 +277,7 @@ class JwtHelperService
                 $refreshTokenData['expires_at']= $newToken['expires_at'];
                 
                 $modelRefreshToken->createOrUpdateRefreshToken($refreshTokenData);
-                $data['result']['refresh_token'] = $newToken['token'];
+                $data['result'] = $newToken['token'];
             }
         } catch (\Exception $e) {
             report($e);
