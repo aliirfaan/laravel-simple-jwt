@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use \Firebase\JWT\JWT;
 use aliirfaan\LaravelSimpleJwt\Models\ModelRefreshToken;
+use aliirfaan\LaravelSimpleJwt\Exceptions\NotFoundException;
 
 /**
  * JwtHelperService
@@ -13,107 +14,60 @@ use aliirfaan\LaravelSimpleJwt\Models\ModelRefreshToken;
  * Helper class to generate and validate JWT token
  */
 class JwtHelperService
-{    
+{        
     /**
-     * jwtSecret
+     * loadJwtProfile
      *
-     * @var String secret key to encode jwt
+     * @param  string $profile jwt profile defined in config
+     * @return array
+     * @throws NotFoundException If profile is not found
      */
-    private $jwtSecret;
-        
-    /**
-     * jwtIssuer
-     *
-     * @var String jwt issuing authority
-     */
-    private $jwtIssuer;
-        
-    /**
-     * jwtAudience
-     *
-     * @var String jwt audience
-     */
-    private $jwtAudience;    
-
-    /**
-     * jwtAlgo
-     *
-     * @var String Supported algorith to hash jwt
-     */
-    private $jwtAlgo;
-
-        
-    /**
-     * jwtTtlSeconds
-     *
-     * @var int Number of seconds after which jwt expires
-     */
-    private $jwtTtlSeconds;
-
-        
-    /**
-     * jwtRefreshTtlDays
-     *
-     * @var int Number of days to extend refresh token expiry
-     */
-    private $jwtRefreshTtlDays;
-
-        
-    /**
-     * jwtDoesExpire
-     *
-     * @var bool whether jwt expires
-     */
-    private $jwtDoesExpire;
-
-        
-    /**
-     * jwtRefreshShouldExtend
-     *
-     * @var bool whether we shoudl extend refresh token
-     */
-    private $jwtRefreshShouldExtend;
-
-    public function __construct()
+    public function loadJwtProfile($profile)
     {
-        $this->jwtSecret = config('simple-jwt.jwt_secret');
-        $this->jwtAlgo = config('simple-jwt.jwt_algo');
-        $this->jwtIssuer = config('simple-jwt.jwt_issuer');
-        $this->jwtAudience = config('simple-jwt.jwt_audience');
-        $this->jwtDoesExpire = config('simple-jwt.jwt_does_expire');
-        $this->jwtTtlSeconds = config('simple-jwt.jwt_ttl_seconds');
-        $this->jwtRefreshShouldExtend = config('simple-jwt.jwt_refresh_should_extend');
-        $this->jwtRefreshTtlDays = config('simple-jwt.jwt_refresh_ttl_days');
+        $configKey = 'simple-jwt.profiles.' . $profile;
+        $jwtProfile = [];
+        if (config()->has($configKey)) {
+            $jwtProfile = config($configKey);
+        } else {
+            throw new NotFoundException('Profile not found');
+        }
+
+        return $jwtProfile;
     }
     
     /**
      * createJwtToken
      *
      * Create a jwt with given payload
-     * @TODO: nbf
      * 
-     * @param  array $payload jwt payload
+     * @param  array $customPayload jwt custom payload
+     * @param  string $profile jwt profile defined in config
+     * @param  array $overrideClaims array of claims to override or include
      * @return string jwt token
      */
-    public function createJwtToken($payload)
+    public function createJwtToken($customPayload, $profile = 'default', $overrideClaims = [])
     {
-        $issuedAtClaim = time();
-        //$notBeforeClaim = $issuedAtClaim + 1;
+        $jwtProfile = $this->loadJwtProfile($profile);
 
+        $issuedAtClaim = time();
+        
         $tokenPayload = array(
-            'iss' => $this->jwtIssuer,
-            'aud' => $this->jwtAudience,
+            'iss' => $jwtProfile['jwt_issuer'],
+            'aud' => $jwtProfile['jwt_audience'],
             'iat' => $issuedAtClaim,
-            //'nbf' => $notBeforeClaim,
-            'data' => $payload,
+            'data' => $customPayload,
         );
 
         // check if our tokens have an expiry
-        if (intval($this->jwtDoesExpire) == 1) {
-            $expiredClaim = $issuedAtClaim + $this->jwtTtlSeconds;
+        if (intval($jwtProfile['jwt_does_expire']) == 1) {
+            $expiredClaim = $issuedAtClaim + $jwtProfile['jwt_ttl_seconds'];
             $tokenPayload['exp'] = $expiredClaim;
         }
-        $token = JWT::encode($tokenPayload, $this->jwtSecret);
+
+        // replace claims if provided
+        $tokenPayload = array_replace($tokenPayload, $overrideClaims);
+
+        $token = JWT::encode($tokenPayload, $jwtProfile['jwt_secret']);
 
         return $token;
     }
@@ -124,9 +78,10 @@ class JwtHelperService
      * Verifies jwt token validity, expiry, signature
      *
      * @param  string $token jwt token
+     * @param  string $profile jwt profile defined in config
      * @return array
      */
-    public function verifyJwtToken($token)
+    public function verifyJwtToken($token, $profile = 'default')
     {
         $data = array(
             'result' => null,
@@ -135,7 +90,12 @@ class JwtHelperService
         );
 
         try {
-            $decoded = JWT::decode($token, $this->jwtSecret, array($this->jwtAlgo));
+            $jwtProfile = $this->loadJwtProfile($profile);
+
+            // leeway
+            JWT::$leeway = $jwtProfile['jwt_leeway_seconds'];
+            
+            $decoded = JWT::decode($token, $jwtProfile['jwt_secret'], array($jwtProfile['jwt_algo']));
             $data['result'] = $decoded->data;
         } catch (\Firebase\JWT\BeforeValidException $e) {
             $data['errors'] = true;
@@ -157,13 +117,16 @@ class JwtHelperService
     /**
      * createRefreshToken
      *
+     * @param  string $profile jwt profile defined in config
      * @return string refresh token
      */
-    public function createRefreshToken()
+    public function createRefreshToken($profile = 'default')
     {
+        $jwtProfile = $this->loadJwtProfile($profile);
+
         $refreshTokenUuid = (string) Str::uuid();
         $hashedRefreshToken = Hash::make($refreshTokenUuid);
-        $refreshTtlDays = '+' . $this->jwtRefreshTtlDays . ' days';
+        $refreshTtlDays = '+' .$jwtProfile['jwt_refresh_ttl_days'] . ' days';
         $refreshTokenExpiryDate = Date('Y-m-d H:i:s', strtotime($refreshTtlDays));
 
         $refreshToken = [
@@ -232,9 +195,10 @@ class JwtHelperService
      * @param  string $modelType model name
      * @param  int $modelId model id in database
      * @param  string|null $token refresh token
+     * @param  string $profile jwt profile defined in config
      * @return array
      */
-    public function processRefreshToken($modelType, $modelId, $token = null)
+    public function processRefreshToken($modelType, $modelId, $token = null, $profile = 'default')
     {
         $data = array(
             'success' => false,
@@ -244,6 +208,8 @@ class JwtHelperService
         );
 
         try {
+            $jwtProfile = $this->loadJwtProfile($profile);
+
             $modelRefreshToken =  new ModelRefreshToken();
             $refreshTokenObj = $modelRefreshToken->getRefreshToken($modelType, $modelId);
             $refreshTokenData = null;
@@ -252,7 +218,7 @@ class JwtHelperService
                 // a refresh token exists, check its validity
                 $isValidRefreshToken = $this->verifyRefreshToken($refreshTokenObj, $token);
                 if ($isValidRefreshToken['success'] == true) {
-                    if (intval($this->jwtRefreshShouldExtend) == 1) {
+                    if (intval($jwtProfile['jwt_refresh_should_extend']) == 1) {
                         $refreshTokenData = [
                             'model_id' => $refreshTokenObj->model_id, 
                             'model_type' => $refreshTokenObj->model_type

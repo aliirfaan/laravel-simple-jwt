@@ -18,7 +18,9 @@ This package allows you to generate Json Web Tokens. You can then verify the JWT
 
 ## Features
 
-* Generate JWT
+* Multiple JWT profiles. Each profile can have its own expiry, secret, etc...
+* Generate JWT with custom claim
+* Public claims can be included/overridden on generation
 * Verify JWT
 * Configuration for JWT expiry
 * Refresh token flow after JWT expires
@@ -70,6 +72,8 @@ Apply the migrations:
 
 This package publishes an `simple-jwt.php` file inside your applications's `config` folder which contains the settings for this package. Most of the variables are bound to environment variables, but you are free to directly edit this file, or add the configuration keys to the `.env` file.
 
+The configurations are encapsulated in a profiles array with a 'default' profile available. You can add new profiles by adding a new array key.
+
 jwt_secret | String
 Secret key to use to encode JWT. You can generate one using an online service or package.
 
@@ -112,6 +116,13 @@ Number of seconds after which the JWT expires if jwt_does_expire is set to true
 'jwt_ttl_seconds' => env('JWT_TTL_SECONDS', 900)
 ```
 
+jwt_leeway_seconds | Numeric
+When checking nbf, iat or expiration times, we want to provide some extra leeway time to account for clock skew
+
+```php
+'jwt_leeway_seconds' => env('JWT_LEEWAY_SECONDS', 0)
+```
+
 jwt_refresh_should_extend | Bool (true or false)
 Whether we should automatically extend the JWT refresh token
 
@@ -127,6 +138,39 @@ Number of days to extend refresh token expiry
 ```
 
 ## Usage
+
+### New profile
+
+```php
+<?php
+// simple-jwt.php
+
+'profiles' => [
+    // default jwt settings, you can add other profiles with the same format below
+    'default' => [
+        'jwt_secret' => env('DEFAULT_JWT_SECRET'),
+        'jwt_algo' => env('DEFAULT_JWT_ALGO', 'HS256'),
+        'jwt_issuer' => env('DEFAULT_JWT_ISSUER', config('app.name')),
+        'jwt_audience' => env('DEFAULT_JWT_AUDIENCE', config('app.url')),
+        'jwt_does_expire' => env('DEFAULT_JWT_DOES_EXPIRE', true),
+        'jwt_ttl_seconds' => env('DEFAULT_JWT_TTL_SECONDS', 900),
+        'jwt_leeway_seconds' => env('DEFAULT_JWT_LEEWAY_SECONDS', 0),
+        'jwt_refresh_should_extend' => env('DEFAULT_JWT_REFRESH_SHOULD_EXTEND', true),
+        'jwt_refresh_ttl_days' => env('DEFAULT_JWT_REFRESH_TTL_DAYS', 90),
+    ],
+    'custom_profile' => [
+        'jwt_secret' => env('CUSTOM_PROFILE_JWT_SECRET'),
+        'jwt_algo' => env('CUSTOM_PROFILE_JWT_ALGO', 'HS256'),
+        'jwt_issuer' => env('CUSTOM_PROFILE_JWT_ISSUER', config('app.name')),
+        'jwt_audience' => env('CUSTOM_PROFILE_JWT_AUDIENCE', config('app.url')),
+        'jwt_does_expire' => env('CUSTOM_PROFILE_JWT_DOES_EXPIRE', true),
+        'jwt_ttl_seconds' => env('CUSTOM_PROFILE_JWT_TTL_SECONDS', 900),
+        'jwt_leeway_seconds' => env('CUSTOM_PROFILE_JWT_LEEWAY_SECONDS', 0),
+        'jwt_refresh_should_extend' => env('CUSTOM_PROFILE_JWT_REFRESH_SHOULD_EXTEND', true),
+        'jwt_refresh_ttl_days' => env('CUSTOM_PROFILE_JWT_REFRESH_TTL_DAYS', 90),
+    ]
+]
+```
 
 ```php
 <?php
@@ -150,9 +194,18 @@ class JwtTestController extends Controller
             'customer_id' => 1234,
         );
 
+        // include or override claims if needed
+        // useful for including project specific claims like scope, locale, nbf, etc...
+        // https://www.iana.org/assignments/jwt/jwt.xhtml
+        $overrideClaims = array(
+            'iss' => 'custom_flow_issuer',
+            'iat' => time() + 3000
+        );
+
         // jwt token
-        $jwt = $jwtHelperService->createJwtToken($tokenPayload);
-        //dd($jwt);
+        $profile = 'default';
+        $jwt = $jwtHelperService->createJwtToken($tokenPayload, $profile, $overrideClaims);
+        dd($jwt);
 
         // verify jwt, you will normally do this in a middleware
         $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJMYXJhdmVsX2Jsb2ciLCJhdWQiOiJodHRwOlwvXC9sb2NhbGhvc3RcL2Jsb2ciLCJpYXQiOjE2MTIxODAyMTEsImRhdGEiOnsiY3VzdG9tZXJfaWQiOjEyMzR9LCJleHAiOjE2MTIxODExMTF9.uqFln2iQVRvaYvKDTGEG29SrT1flj9JEvFBg2zO3whM';
