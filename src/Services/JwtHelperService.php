@@ -50,11 +50,13 @@ class JwtHelperService
         $jwtProfile = $this->loadJwtProfile($profile);
 
         $issuedAtClaim = time();
+        $jwtSuject = array_key_exists('sub', $customPayload) ? $customPayload['sub'] : null;
         
         $tokenPayload = array(
             'iss' => $jwtProfile['jwt_issuer'],
             'aud' => $jwtProfile['jwt_audience'],
             'iat' => $issuedAtClaim,
+            'sub' => $jwtSuject,
             'data' => $customPayload,
         );
 
