@@ -69,7 +69,7 @@ class SimpleJwtGuard implements Guard
             return $this->user;
         }
 
-        $token = $request->bearerToken();
+        $token = $this->request->bearerToken();
         $verifyToken = $this->jwtService->verifyJwtToken($token);
         if ($verifyToken['errors'] == null) {
             $tokenClaims = (array) $verifyToken['result'];

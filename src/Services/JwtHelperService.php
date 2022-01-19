@@ -48,17 +48,15 @@ class JwtHelperService
     public function createJwtToken($customPayload, $profile = 'default', $overrideClaims = [])
     {
         $jwtProfile = $this->loadJwtProfile($profile);
-
-        $issuedAtClaim = time();
-        $jwtSuject = array_key_exists('sub', $customPayload) ? $customPayload['sub'] : null;
         
         $tokenPayload = array(
             'iss' => $jwtProfile['jwt_issuer'],
             'aud' => $jwtProfile['jwt_audience'],
             'iat' => $issuedAtClaim,
-            'sub' => $jwtSuject,
-            'data' => $customPayload,
+            'sub' => null,
         );
+
+        $tokenPayload = \array_merge($tokenPayload, $customPayload);
 
         // check if our tokens have an expiry
         if (intval($jwtProfile['jwt_does_expire']) == 1) {
