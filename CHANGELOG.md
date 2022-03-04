@@ -7,11 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com) and this p
 
 ### Added
 
-- Nothing
+- Contracts\JwtServiceInterface
+- Services\Auth\SimpleJwtGuard
 
 ### Changed
 
 - createJwtToken($customPayload, $profile = 'default', $overrideClaims = []) now setting sub (subject) reserved claim
+- JwtHelperService now implements Contracts\JwtServiceInterface
 
 ### Deprecated
 
