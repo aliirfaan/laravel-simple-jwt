@@ -283,6 +283,25 @@ class SimpleJwtVerifyExample
 }
 ```
 
+### Guard usage
+
+To use the guard, add it in your auth config
+
+```php
+config\auth.php
+```
+
+```php
+    'guards' => [
+        'api' => [
+            'driver' => 'simple-jwt-guard',
+            'provider' => 'user',
+            'profile' => 'default', // the jwt profile you want to use for the provider
+            'jwt_class' => null // if you have implemented your own jwt service that implements JwtServiceInterface
+        ]
+    ],
+```
+
 ## License
 
 The MIT License (MIT)
