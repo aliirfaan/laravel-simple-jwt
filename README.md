@@ -224,8 +224,9 @@ class JwtTestController extends Controller
         $modelType = 'customer'; // your model type name you want, should be unique so that you can sent refresh tokens to multiple types of model 
         $modelId = 253; // your model id
         $refreshToken = '798798-543543-5435432543'; // the refresh token sent by consumer/client, will be null for new logins
+        $deviceId = 1536-452; // your device id if you are using devic_id column
 
-        $refreshTokenResult = processRefreshToken($modelType, $modelId, $refreshToken);
+        $refreshTokenResult = processRefreshToken($modelType, $modelId, $refreshToken, $deviceId);
         dd($refreshTokenResult);
     }
 }

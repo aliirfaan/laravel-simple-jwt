@@ -165,7 +165,6 @@ class JwtHelperService implements JwtServiceInterface
         return $data;
     }
     
-    
     /**
      * processRefreshToken
      * 
@@ -174,10 +173,11 @@ class JwtHelperService implements JwtServiceInterface
      * @param  string $modelType model name
      * @param  int $modelId model id in database
      * @param  string|null $token refresh token
+     * @param  string|null $deviceId device id
      * @param  string $profile jwt profile defined in config
      * @return array
      */
-    public function processRefreshToken($modelType, $modelId, $token = null, $profile = 'default')
+    public function processRefreshToken($modelType, $modelId, $token = null, $deviceId = null, $profile = 'default')
     {
         $data = array(
             'success' => false,
@@ -190,7 +190,7 @@ class JwtHelperService implements JwtServiceInterface
             $jwtProfile = $this->loadJwtProfile($profile);
 
             $modelRefreshToken =  new ModelRefreshToken();
-            $refreshTokenObj = $modelRefreshToken->getRefreshToken($modelType, $modelId);
+            $refreshTokenObj = $modelRefreshToken->getRefreshToken($modelType, $modelId, $deviceId);
             $refreshTokenData = null;
 
             if (!is_null($refreshTokenObj)) {
@@ -200,7 +200,8 @@ class JwtHelperService implements JwtServiceInterface
                     if (intval($jwtProfile['jwt_refresh_should_extend']) == 1) {
                         $refreshTokenData = [
                             'model_id' => $refreshTokenObj->model_id, 
-                            'model_type' => $refreshTokenObj->model_type
+                            'model_type' => $refreshTokenObj->model_type,
+                            'device_id' => $refreshTokenObj->device_id 
                         ];
                     }
                 } else {
@@ -211,7 +212,8 @@ class JwtHelperService implements JwtServiceInterface
                 // no refresh token found, add a new refresh token
                 $refreshTokenData = [
                     'model_id' => $modelId, 
-                    'model_type' => $modelType
+                    'model_type' => $modelType,
+                    'device_id' => $deviceId 
                 ];
             }
 

@@ -17,6 +17,7 @@ class CreateModelRefreshTokensTable extends Migration
             $table->id();
             $table->string('model_id')->index('model_id_index');
             $table->string('model_type')->index('model_type_index');
+            $table->string('device_id')->nullable()->index('device_id_index');
             $table->string('refresh_token');
             $table->timestamp('expires_at')->nullable()->index('expires_at_index');
             $table->tinyInteger('blacklisted')->default(0);

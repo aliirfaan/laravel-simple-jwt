@@ -3,6 +3,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 6.0.0 - 2022
+
+### Added
+
+- device_id column to bind refresh token to a device
+
+### Changed
+
+- ModelRefreshToken to use device_id column
+- processRefreshToken() add deviceId as parameter
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- Nothing
+
 ## 5.0.0 - 2022-07-20
 
 ### Added
