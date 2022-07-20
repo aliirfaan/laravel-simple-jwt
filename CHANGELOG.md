@@ -3,6 +3,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 5.0.0 - 2022-07-20
+
+### Added
+
+- Contracts\JwtServiceInterface
+- Services\Auth\SimpleJwtGuard, implements Illuminate\Contracts\Auth\Guard
+
+### Changed
+
+- createJwtToken($customPayload, $profile = 'default', $overrideClaims = []) now setting sub (subject) reserved claim
+- JwtHelperService now implements Contracts\JwtServiceInterface
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- Nothing
+
 ## 4.0.0 - 2021-09-06
 
 ### Added

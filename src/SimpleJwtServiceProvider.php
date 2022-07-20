@@ -2,6 +2,8 @@
 
 namespace aliirfaan\LaravelSimpleJwt;
 
+use Illuminate\Support\Facades\Auth;
+use aliirfaan\LaravelSimpleJwt\Services\Auth\SimpleJwtGuard;
 use aliirfaan\LaravelSimpleJwt\Services\JwtHelperService;
 
 class SimpleJwtServiceProvider extends \Illuminate\Support\ServiceProvider
@@ -15,6 +17,10 @@ class SimpleJwtServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         $this->app->bind('aliirfaan\LaravelSimpleJwt\Services\JwtHelperService', function ($app) {
             return new JwtHelperService();
+        });
+
+        Auth::extend('simple-jwt-guard', function ($app, $name, array $config) {
+            return new SimpleJwtGuard($name, Auth::createUserProvider($config['provider']), $config['jwt_class'], $config['profile'], $this->app['events'], $this->app['request']);
         });
     }
 

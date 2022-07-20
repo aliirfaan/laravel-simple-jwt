@@ -1,6 +1,6 @@
 # Laravel Simple JWT
 
-This package allows you to generate Json Web Tokens. You can then verify the JWT code and grant access based on its validity. You can also use the optional refresh token flow for long lived sessions.
+This package allows you to generate JSON Web Tokens. You can then verify the JWT code and grant access based on its validity. You can also use the optional refresh token flow for long lived sessions. You can generate and verify JWT directly inside a controller or use the provided authentication guard.
 
 ## JWT flow
 
@@ -26,6 +26,7 @@ This package allows you to generate Json Web Tokens. You can then verify the JWT
 * Refresh token flow after JWT expires
 * Extend refresh token everytime the application is used so that user is not logged out 
 * Blacklist user so that token is not refreshed
+* Authentication guard to authenticate users
 
 ## Requirements
 
@@ -280,6 +281,25 @@ class SimpleJwtVerifyExample
         return $next($request);
     }
 }
+```
+
+### Guard usage
+
+To use the guard, add it in your auth config
+
+```php
+config\auth.php
+```
+
+```php
+    'guards' => [
+        'api' => [
+            'driver' => 'simple-jwt-guard',
+            'provider' => 'user',
+            'profile' => 'default', // the jwt profile you want to use for the provider
+            'jwt_class' => null // if you have implemented your own jwt service that implements JwtServiceInterface
+        ]
+    ],
 ```
 
 ## License

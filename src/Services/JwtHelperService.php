@@ -7,13 +7,14 @@ use Illuminate\Support\Str;
 use \Firebase\JWT\JWT;
 use aliirfaan\LaravelSimpleJwt\Models\ModelRefreshToken;
 use aliirfaan\LaravelSimpleJwt\Exceptions\NotFoundException;
+use aliirfaan\LaravelSimpleJwt\Contracts\JwtServiceInterface;
 
 /**
  * JwtHelperService
  * 
  * Helper class to generate and validate JWT token
  */
-class JwtHelperService
+class JwtHelperService implements JwtServiceInterface
 {        
     /**
      * loadJwtProfile
@@ -36,27 +37,21 @@ class JwtHelperService
     }
     
     /**
-     * createJwtToken
-     *
-     * Create a jwt with given payload
-     * 
-     * @param  array $customPayload jwt custom payload
-     * @param  string $profile jwt profile defined in config
-     * @param  array $overrideClaims array of claims to override or include
-     * @return string jwt token
+     * {@inheritdoc}
      */
     public function createJwtToken($customPayload, $profile = 'default', $overrideClaims = [])
     {
         $jwtProfile = $this->loadJwtProfile($profile);
 
         $issuedAtClaim = time();
-        
         $tokenPayload = array(
             'iss' => $jwtProfile['jwt_issuer'],
             'aud' => $jwtProfile['jwt_audience'],
             'iat' => $issuedAtClaim,
-            'data' => $customPayload,
+            'sub' => null,
         );
+
+        $tokenPayload = \array_merge($tokenPayload, $customPayload);
 
         // check if our tokens have an expiry
         if (intval($jwtProfile['jwt_does_expire']) == 1) {
@@ -73,13 +68,7 @@ class JwtHelperService
     }
     
     /**
-     * verifyJwtToken
-     * 
-     * Verifies jwt token validity, expiry, signature
-     *
-     * @param  string $token jwt token
-     * @param  string $profile jwt profile defined in config
-     * @return array
+     * {@inheritdoc}
      */
     public function verifyJwtToken($token, $profile = 'default')
     {
@@ -115,10 +104,7 @@ class JwtHelperService
     }
     
     /**
-     * createRefreshToken
-     *
-     * @param  string $profile jwt profile defined in config
-     * @return string refresh token
+     * {@inheritdoc}
      */
     public function createRefreshToken($profile = 'default')
     {
@@ -139,14 +125,7 @@ class JwtHelperService
     }
     
     /**
-     * verifyRefreshToken
-     *
-     * verifies refersh token validity by comparison, expiry date, blacklisted
-     *
-     * @param  ModelRefreshToken $modelObject
-     * @param  string/null $token refresh token. If token is null,we only check if blacklisted and expiry
-     * 
-     * @return array
+     * {@inheritdoc}
      */
     public function verifyRefreshToken($modelObject, $token = null)
     {
