@@ -167,7 +167,9 @@ class SimpleJwtGuard implements Guard
         // to validate the user against the given credentials, and if they are in
         // fact valid we'll log the users into the application and return true.
         if ($this->hasValidCredentials($user, $credentials)) {
-            return $this->login($user, $remember);
+            $overrideClaims = array_key_exists('override_claims', $credentials) ? $credentials['override_claims'] : [];
+
+            return $this->login($user, $overrideClaims, $remember);
         }
 
 
@@ -186,7 +188,7 @@ class SimpleJwtGuard implements Guard
      * @param  bool  $remember
      * @return void
      */
-    public function login(AuthenticatableContract $user, $remember = false)
+    public function login(AuthenticatableContract $user, $overrideClaims = [], $remember = false)
     {
 
         // If we have an event dispatcher instance set we will fire an event so that
@@ -200,7 +202,7 @@ class SimpleJwtGuard implements Guard
         $tokenPayload = [
             'sub' => $user->getAuthIdentifier(),
         ];
-        $jwt = $this->jwtService->createJwtToken($tokenPayload, $this->profile);
+        $jwt = $this->jwtService->createJwtToken($tokenPayload, $this->profile, $overrideClaims);
 
         $this->setUser($user);
 
