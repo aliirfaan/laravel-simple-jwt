@@ -85,7 +85,7 @@ class JwtHelperService implements JwtServiceInterface
             JWT::$leeway = $jwtProfile['jwt_leeway_seconds'];
             
             $decoded = JWT::decode($token, $jwtProfile['jwt_secret'], array($jwtProfile['jwt_algo']));
-            $data['result'] = $decoded->data;
+            $data['result'] = $decoded;
         } catch (\Firebase\JWT\BeforeValidException $e) {
             $data['errors'] = true;
             $data['message'] = $e->getMessage();

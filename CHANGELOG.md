@@ -3,6 +3,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 8.0.0 - 2022-08-09
+
+### Added
+
+- Guard method authenticateByToken() to authenticate using token
+
+### Changed
+
+- SimpleJwtGuard
+
+- JwtHelperService verifyJwtToken($token, $profile = 'default')
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- Nothing
+
 ## 7.0.0 - 2022-08-03
 
 ### Added
