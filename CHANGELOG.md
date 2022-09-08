@@ -3,6 +3,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 8.0.1 - 2022-09-08
+
+### Added
+
+- Nothing
+
+### Changed
+
+- SimpleJwtGuard authenticateByToken()
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- authenticateByToken() case where user provider can return null for valid token
+
 ## 8.0.0 - 2022-08-09
 
 ### Added

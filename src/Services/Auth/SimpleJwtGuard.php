@@ -358,16 +358,29 @@ class SimpleJwtGuard implements Guard
 
     public function authenticateByToken()
     {
+        $data = [
+            'success' => false,
+            'errors' => null,
+            'message' => null,
+        ];
+
         $token = $this->request->bearerToken();
-       
+
         $verifyTokenResult = $this->jwtService->verifyJwtToken($token, $this->profile);
-        
-        if ($verifyTokenResult['errors'] == null) {
+        $data = $verifyTokenResult;
+
+        if ($verifyTokenResult['success'] == true) {
             $tokenClaims = (array) $verifyTokenResult['result'];
             $user = $this->provider->retrieveById($tokenClaims['sub']);
-            $this->setUser($user);
+            if (is_null($user)) {
+                $data['errors'] = true;
+                $data['message'] = 'User not found.';
+            } else {
+                $data['success'] = true;
+                $this->setUser($user);
+            }
         }
 
-        return $verifyTokenResult;
+        return $data;
     }
 }
