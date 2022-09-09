@@ -369,7 +369,7 @@ class SimpleJwtGuard implements Guard
         $verifyTokenResult = $this->jwtService->verifyJwtToken($token, $this->profile);
         $data = $verifyTokenResult;
 
-        if ($verifyTokenResult['success'] == true) {
+        if ($verifyTokenResult['errors'] == null) {
             $tokenClaims = (array) $verifyTokenResult['result'];
             $user = $this->provider->retrieveById($tokenClaims['sub']);
             if (is_null($user)) {
