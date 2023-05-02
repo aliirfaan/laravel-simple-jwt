@@ -76,7 +76,7 @@ This package publishes an `simple-jwt.php` file inside your applications's `conf
 The configurations are encapsulated in a profiles array with a 'default' profile available. You can add new profiles by adding a new array key.
 
 jwt_secret | String
-Secret key to use to encode JWT. You can generate one using an online service or package.
+Secret key to use to encode JWT. You can generate one using an online service (https://mkjwk.org/) or package.
 
 ```php
 'jwt_secret' => env('JWT_SECRET')

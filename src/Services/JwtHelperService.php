@@ -5,6 +5,7 @@ namespace aliirfaan\LaravelSimpleJwt\Services;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use \Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use aliirfaan\LaravelSimpleJwt\Models\ModelRefreshToken;
 use aliirfaan\LaravelSimpleJwt\Exceptions\NotFoundException;
 use aliirfaan\LaravelSimpleJwt\Contracts\JwtServiceInterface;
@@ -62,7 +63,7 @@ class JwtHelperService implements JwtServiceInterface
         // replace claims if provided
         $tokenPayload = array_replace($tokenPayload, $overrideClaims);
 
-        $token = JWT::encode($tokenPayload, $jwtProfile['jwt_secret']);
+        $token = JWT::encode($tokenPayload, $jwtProfile['jwt_secret'], $jwtProfile['jwt_algo']);
 
         return $token;
     }
@@ -84,7 +85,7 @@ class JwtHelperService implements JwtServiceInterface
             // leeway
             JWT::$leeway = $jwtProfile['jwt_leeway_seconds'];
             
-            $decoded = JWT::decode($token, $jwtProfile['jwt_secret'], array($jwtProfile['jwt_algo']));
+            $decoded = JWT::decode($token, new Key($jwtProfile['jwt_secret'], $jwtProfile['jwt_algo']));
             $data['result'] = $decoded;
         } catch (\Firebase\JWT\BeforeValidException $e) {
             $data['errors'] = true;

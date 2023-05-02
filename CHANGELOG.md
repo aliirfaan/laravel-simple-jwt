@@ -3,6 +3,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 8.1.0 - 2024-05-02
+
+### Added
+
+- upgraded firebase/php-jwt dependency to ^6.0
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
 ## 8.0.2 - 2022-09-09
 
 ### Added
