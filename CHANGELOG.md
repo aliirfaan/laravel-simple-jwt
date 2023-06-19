@@ -3,7 +3,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
-## 8.1.0 - 2024-05-02
+## 8.1.1 - 2023-06-19
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- verifyJwtToken() check if token is null before decoded using JWT::decode()
+
+## 8.1.0 - 2023-05-02
 
 ### Added
 
@@ -22,6 +44,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com) and this p
 - nothing
 
 ### Fixed
+
+- nothing
 
 ## 8.0.2 - 2022-09-09
 

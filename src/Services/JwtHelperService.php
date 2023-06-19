@@ -80,13 +80,20 @@ class JwtHelperService implements JwtServiceInterface
         );
 
         try {
-            $jwtProfile = $this->loadJwtProfile($profile);
+            if (is_null($token) || trim($token) === '') {
+                $data['errors'] = true;
+                $data['message'] = 'No token specified.';
+            }
 
-            // leeway
-            JWT::$leeway = $jwtProfile['jwt_leeway_seconds'];
-            
-            $decoded = JWT::decode($token, new Key($jwtProfile['jwt_secret'], $jwtProfile['jwt_algo']));
-            $data['result'] = $decoded;
+            if (is_null($data['errors'])) {
+                $jwtProfile = $this->loadJwtProfile($profile);
+
+                // leeway
+                JWT::$leeway = $jwtProfile['jwt_leeway_seconds'];
+                
+                $decoded = JWT::decode($token, new Key($jwtProfile['jwt_secret'], $jwtProfile['jwt_algo']));
+                $data['result'] = $decoded;
+            }
         } catch (\Firebase\JWT\BeforeValidException $e) {
             $data['errors'] = true;
             $data['message'] = $e->getMessage();
