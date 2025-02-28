@@ -38,4 +38,15 @@ class ModelRefreshToken extends Model
             ]
         );
     }
+
+    public function deleteRefreshToken($modelType, $modelId, $deviceId = null)
+    {
+        return ModelRefreshToken::where(function ($query) use ($modelId) {
+            $query->where('model_id', '=', $modelId);
+        })->where(function ($query) use ($modelType) {
+            $query->where('model_type', '=', $modelType);
+        })->where(function ($query) use ($deviceId) {
+            $query->where('device_id', '=', $deviceId);
+        })->delete();
+    }
 }

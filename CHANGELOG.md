@@ -3,6 +3,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 9.0.0 - 2025-02-28
+
+### Added
+
+- deleteRefreshToken() in ModelRefreshToken
+
+### Changed
+
+- processRefreshToken() add grantType parameter to know if login or refresh_token
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- processRefreshToken() could not login if refresh token was expired
+
 ## 8.1.1 - 2023-06-19
 
 ### Added

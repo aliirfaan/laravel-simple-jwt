@@ -12,11 +12,11 @@ use aliirfaan\LaravelSimpleJwt\Contracts\JwtServiceInterface;
 
 /**
  * JwtHelperService
- * 
+ *
  * Helper class to generate and validate JWT token
  */
 class JwtHelperService implements JwtServiceInterface
-{        
+{
     /**
      * loadJwtProfile
      *
@@ -63,9 +63,7 @@ class JwtHelperService implements JwtServiceInterface
         // replace claims if provided
         $tokenPayload = array_replace($tokenPayload, $overrideClaims);
 
-        $token = JWT::encode($tokenPayload, $jwtProfile['jwt_secret'], $jwtProfile['jwt_algo']);
-
-        return $token;
+        return JWT::encode($tokenPayload, $jwtProfile['jwt_secret'], $jwtProfile['jwt_algo']);
     }
     
     /**
@@ -123,13 +121,11 @@ class JwtHelperService implements JwtServiceInterface
         $refreshTtlDays = '+' .$jwtProfile['jwt_refresh_ttl_days'] . ' days';
         $refreshTokenExpiryDate = Date('Y-m-d H:i:s', strtotime($refreshTtlDays));
 
-        $refreshToken = [
+        return [
             'token' => $refreshTokenUuid,
             'hashed_token' => $hashedRefreshToken,
             'expires_at' => $refreshTokenExpiryDate,
         ];
-
-        return $refreshToken;
     }
     
     /**
@@ -144,7 +140,7 @@ class JwtHelperService implements JwtServiceInterface
         );
 
         // check if refresh token matches
-        if (!is_null($token) && Hash::check($token, $modelObject->refresh_token) == false) {
+        if (!is_null($token) && !Hash::check($token, $modelObject->refresh_token)) {
             $data['errors'] = true;
             $data['message'] = 'Refresh token does not match';
         }
@@ -175,17 +171,18 @@ class JwtHelperService implements JwtServiceInterface
     
     /**
      * processRefreshToken
-     * 
+     *
      * Verifies refresh token in the database and updates token if required
      *
      * @param  string $modelType model name
      * @param  int $modelId model id in database
      * @param  string|null $token refresh token
+     * @param  string| (login|refresh_token) $grantType grant type
      * @param  string|null $deviceId device id
      * @param  string $profile jwt profile defined in config
      * @return array
      */
-    public function processRefreshToken($modelType, $modelId, $token = null, $deviceId = null, $profile = 'default')
+    public function processRefreshToken($modelType, $modelId, $token = null, $grantType = 'refresh_token', $deviceId = null, $profile = 'default')
     {
         $data = array(
             'success' => false,
@@ -204,25 +201,43 @@ class JwtHelperService implements JwtServiceInterface
             if (!is_null($refreshTokenObj)) {
                 // a refresh token exists, check its validity
                 $isValidRefreshToken = $this->verifyRefreshToken($refreshTokenObj, $token);
-                if ($isValidRefreshToken['success'] == true) {
+                if ($isValidRefreshToken['success']) {
                     if (intval($jwtProfile['jwt_refresh_should_extend']) == 1) {
                         $refreshTokenData = [
-                            'model_id' => $refreshTokenObj->model_id, 
+                            'model_id' => $refreshTokenObj->model_id,
                             'model_type' => $refreshTokenObj->model_type,
-                            'device_id' => $refreshTokenObj->device_id 
+                            'device_id' => $refreshTokenObj->device_id
                         ];
                     }
                 } else {
-                    $data['errors'] = $isValidRefreshToken['errors'];
-                    $data['message'] = $isValidRefreshToken['message'];
+                    // invalidate refresh token
+                    $modelRefreshToken->deleteRefreshToken($modelType, $modelId, $deviceId);
+
+                    // if loging in and refresh token is invalid, create a new refresh token
+                    if ($grantType === 'login') {
+                        $refreshTokenData = [
+                            'model_id' => $refreshTokenObj->model_id,
+                            'model_type' => $refreshTokenObj->model_type,
+                            'device_id' => $refreshTokenObj->device_id
+                        ];
+                    } else {
+                        $data['errors'] = $isValidRefreshToken['errors'];
+                        $data['message'] = $isValidRefreshToken['message'];
+                    }
                 }
             } else {
-                // no refresh token found, add a new refresh token
-                $refreshTokenData = [
-                    'model_id' => $modelId, 
-                    'model_type' => $modelType,
-                    'device_id' => $deviceId 
-                ];
+                if ($grantType === 'login') {
+                    // no refresh token found, add a new refresh token
+                    $refreshTokenData = [
+                        'model_id' => $modelId,
+                        'model_type' => $modelType,
+                        'device_id' => $deviceId
+                    ];
+                } else {
+                    // trying to refresh token without a refresh token
+                    $data['errors'] = true;
+                    $data['message'] = 'No refresh token found';
+                }
             }
 
             // check if we should create or update refresh token
