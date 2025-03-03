@@ -226,7 +226,16 @@ class JwtTestController extends Controller
         $refreshToken = '798798-543543-5435432543'; // the refresh token sent by consumer/client, will be null for new logins
         $deviceId = 1536-452; // your device id if you are using devic_id column
 
-        $refreshTokenResult = processRefreshToken($modelType, $modelId, $refreshToken, $deviceId);
+        // when doing a refresh token
+        // actor already has a refresh token but access token expired
+        // grant new access token and extend refresh token
+        $grantType = 'refresh_token'
+        $refreshTokenResult = processRefreshToken($modelType, $modelId, $refreshToken, $grantType, $deviceId);
+
+        // when login in
+        $grantType = 'login'
+        $refreshTokenResult = processRefreshToken($modelType, $modelId, $refreshToken, $grantType, $deviceId);
+
         dd($refreshTokenResult);
     }
 }
