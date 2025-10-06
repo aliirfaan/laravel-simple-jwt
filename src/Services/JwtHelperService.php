@@ -242,7 +242,7 @@ class JwtHelperService implements JwtServiceInterface
 
             // check if we should create or update refresh token
             if (!is_null($refreshTokenData)) {
-                $newToken = $this->createRefreshToken();
+                $newToken = $this->createRefreshToken($profile);
                 $refreshTokenData['refresh_token'] = $newToken['hashed_token'];
                 $refreshTokenData['expires_at']= $newToken['expires_at'];
                 
