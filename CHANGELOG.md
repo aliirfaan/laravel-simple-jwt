@@ -3,6 +3,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com) and this project adheres to [Semantic Versioning](https://semver.org).
 
+## 9.1.0 - 2026-02-26
+
+### Added
+
+- upgraded firbase/php-jwt dependency to ^7.0
+
+### Changed
+
+- README
+
+### Deprecated
+
+- nothing
+
+### Removed
+
+- nothing
+
+### Fixed
+
+- nothing
+
 ## 9.0.2 - 2025-10-06
 
 ### Added
